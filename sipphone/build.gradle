@@ -46,7 +46,7 @@ def siteUrl = 'https://github.com/marklhp/linphonetest' // 项目主页。
 def gitUrl = 'https://github.com/marklhp/linphonetest.git' // Git仓库的url。
 
 group = "com.sipphone"// 唯一包名,比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的com.ansen.http就是这里配置的。
-version = "1.0.2"//项目引用的版本号，比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的1.0.1就是这里配置的。
+version = "1.0.1"//项目引用的版本号，比如compile 'com.ansen.http:okhttpencapsulation:1.0.1'中的1.0.1就是这里配置的。
 
 install {
     repositories.mavenInstaller {
@@ -55,7 +55,7 @@ install {
             project {
                 packaging 'aar'
                 // 项目描述，复制我的话，这里需要修改。
-                name 'sipphone'// 可选，项目名称。
+                name ''// 可选，项目名称。
                 description 'call phone'// 可选，项目描述。
                 url siteUrl // 项目主页，这里是引用上面定义好。
 
@@ -70,9 +70,9 @@ install {
                 //填写开发者基本信息，复制我的，这里需要修改。
                 developers {
                     developer {
-                        id 'haipeng' // 开发者的id。
-                        name 'heipeng' // 开发者名字。
-                        email 'lhp199207065114@gmail.com' // 开发者邮箱。
+                        id 'marklihaipeng' // 开发者的id。
+                        name 'marklihaipeng' // 开发者名字。
+                        email 'lhpzcy1992@gmail.com' // 开发者邮箱。
                     }
                 }
 
@@ -120,9 +120,9 @@ bintray {
 
     configurations = ['archives']
     pkg {
-        repo = "sipphone"  //Repository名字 需要自己在bintray网站上先添加
+        repo = "linphone"  //Repository名字 需要自己在bintray网站上先添加
         name = "sipphone"// 发布到Bintray上的项目名字，这里的名字不是compile 'com.ansen.library:circleimage:1.0.1'中的circleimage。
-        userOrg = '0706'//Bintray的组织id
+        userOrg = 'sipphone'//Bintray的组织id
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
