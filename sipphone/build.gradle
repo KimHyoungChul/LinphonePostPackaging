@@ -55,7 +55,7 @@ install {
             project {
                 packaging 'aar'
                 // 项目描述，复制我的话，这里需要修改。
-                name ''// 可选，项目名称。
+                name 'sipphone'// 可选，项目名称。
                 description 'call phone'// 可选，项目描述。
                 url siteUrl // 项目主页，这里是引用上面定义好。
 
