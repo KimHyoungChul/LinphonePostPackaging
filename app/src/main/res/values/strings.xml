@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">测试app</string>
+    <string name="couldnt_accept_call">接受呼叫时出错</string>
+</resources>
