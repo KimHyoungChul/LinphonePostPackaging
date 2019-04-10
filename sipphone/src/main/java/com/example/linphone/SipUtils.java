@@ -280,11 +280,10 @@ public class SipUtils {
     /**
      * 接听电话
      *
-     * @param call
      * @return
      */
-    public boolean answer(Call call, Context context) {
-        CallParams params = mCore.createCallParams(call);
+    public boolean answer( Context context) {
+        CallParams params = mCore.createCallParams(mCore.getCurrentCall());
 
         boolean isLowBandwidthConnection = !isHighBandwidthConnection(context);
 
@@ -294,7 +293,7 @@ public class SipUtils {
             Log.e("Could not create call params for call");
         }
 
-        if (params == null || !acceptCallWithParams(call, params)) {
+        if (params == null || !acceptCallWithParams(mCore.getCurrentCall(), params)) {
             // the above method takes care of Samsung Galaxy S
             Toast.makeText(context, "接受呼叫时出错", Toast.LENGTH_SHORT).show();
         } else {

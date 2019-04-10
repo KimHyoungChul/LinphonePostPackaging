@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 SipUtils.getIns().hangUp();
                 break;
             case R.id.linphone_tv4:
-                SipUtils.getIns().answer(SipUtils.getIns().getmCore().getCurrentCall(), MainActivity.this);
+                SipUtils.getIns().answer(MainActivity.this);
                 break;
             case R.id.linphone_tv5:
                 isMicMuted = !isMicMuted;
