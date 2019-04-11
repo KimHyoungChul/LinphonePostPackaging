@@ -67,7 +67,7 @@
             android:id="@+id/linphone_tv7"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="7一键语音"
+            android:text="7退出登录"
             android:gravity="center"
             android:onClick="@{click}"
             />

@@ -317,7 +317,7 @@ public class SipUtils {
         isOnLine = onLine;
     }
 
-    public void destroy() {
+    public void signOut() {
         if (instance == null || mCore == null) return;
         LinphoneManager.getInstance().deleteAccount(0);
         ProxyConfig[] prxCfgs = mCore.getProxyConfigList();
@@ -341,7 +341,7 @@ public class SipUtils {
 
         LinphoneManager.destroy();
         lTask.cancel();
-        lTask = null;
+        lTask=null;
 
     }
 

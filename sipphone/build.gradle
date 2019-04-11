@@ -137,7 +137,7 @@ uploadArchives {
         pom.project {
             groupId "com.example.sipphone" // 可以随意取，一般取包名
             artifactId 'sipphone' // 可以随意取，一般取库的名字
-            version '1.0.0' // 版本号
+            version '1.0.2' // 版本号
         }
     }
 }

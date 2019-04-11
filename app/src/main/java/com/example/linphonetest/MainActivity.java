@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 
@@ -20,9 +19,7 @@ import org.linphone.core.Call;
 import org.linphone.core.Core;
 import org.linphone.core.CoreException;
 import org.linphone.core.CoreListenerStub;
-import org.linphone.core.Factory;
 import org.linphone.core.GlobalState;
-import org.linphone.core.LogCollectionState;
 import org.linphone.core.ProxyConfig;
 import org.linphone.core.RegistrationState;
 
@@ -85,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.linphone_tv7:
+                SipUtils.getIns().signOut();
                 break;
 
         }
@@ -94,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onGlobalStateChanged(Core lc, GlobalState gstate, String message) {
             super.onGlobalStateChanged(lc, gstate, message);
-            Log.d("linphone_初始化状态=", gstate.name() + "===" + message);
+            Log.d("linphone_初始化状态=", gstate.name() + "===" + message+Thread.currentThread().getName());
             /**
              * 初始化成功
              */
@@ -117,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onCallStateChanged(Core lc, Call call, Call.State cstate, String message) {
             super.onCallStateChanged(lc, call, cstate, message);
-            Log.d("linphone_通话状态=", cstate.name() + "===" + message);
+            Log.d("linphone_通话状态=", cstate.name() + "===" + message+Thread.currentThread().getName());
             /**
              * 通话状态
              */
@@ -127,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onRegistrationStateChanged(Core lc, ProxyConfig cfg, RegistrationState cstate, String message) {
             super.onRegistrationStateChanged(lc, cfg, cstate, message);
-            Log.d("linphone_注册状态=", cstate.toString() + "===" + message);
+            Log.d("linphone_注册状态=", cstate.toString() + "===" + message+Thread.currentThread().getName());
             /**
              * 注册成功
              */
