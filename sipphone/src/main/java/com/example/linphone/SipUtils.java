@@ -1,6 +1,7 @@
 package com.example.linphone;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -392,4 +393,33 @@ public class SipUtils {
             throw new NullPointerException("核心类core为空");
         }
     }
+
+    /**
+     * 播放按键声音
+     * @param r
+     * @param dtmf
+     */
+    public void playDtmf(ContentResolver r, char dtmf){
+        LinphoneManager.getInstance().playDtmf(r,dtmf);
+    }
+
+    /**
+     * 关闭按键声音
+     */
+    public void stopDtmf(){
+        if (mCore!=null){
+            mCore.stopDtmf();
+        }
+    }
+
+    /**
+     * 发送按键值
+     * @param c
+     */
+    public void sendDtmf(char c){
+        if (mCore!=null&&mCore.getCurrentCall()!=null){
+            mCore.getCurrentCall().sendDtmf(c);
+        }
+    }
+
 }

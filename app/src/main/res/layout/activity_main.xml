@@ -103,6 +103,21 @@
             android:gravity="center"
             android:onClick="@{click}"
             />
-
+        <TextView
+            android:id="@+id/linphone_tv8"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="8按键声音"
+            android:gravity="center"
+            android:onClick="@{click}"
+            />
+        <TextView
+            android:id="@+id/linphone_tv9"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="9按键值发送"
+            android:gravity="center"
+            android:onClick="@{click}"
+            />
     </LinearLayout>
 </layout>
