@@ -14,7 +14,6 @@ import com.example.linphone.LinphoneManager;
 import com.example.linphone.SipUtils;
 import com.example.linphonetest.databinding.ActivityMainBinding;
 
-
 import org.linphone.core.Call;
 import org.linphone.core.Core;
 import org.linphone.core.CoreException;
@@ -24,6 +23,7 @@ import org.linphone.core.ProxyConfig;
 import org.linphone.core.RegistrationState;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     String username = "69802008619";
@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(strings, 0);
         }
-        LinphoneManager.initLoggingService(true,true,getString(R.string.app_name));
+        Objects.requireNonNull(getSupportActionBar()).hide();
+        LinphoneManager.initLoggingService(true, true, getString(R.string.app_name));
     }
 
     @Override
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 SipUtils.getIns().hangUp();
                 break;
             case R.id.linphone_tv4:
-                SipUtils.getIns().answer(MainActivity.this);
+                SipUtils.getIns().answer( MainActivity.this);
                 break;
             case R.id.linphone_tv5:
                 isMicMuted = !isMicMuted;
@@ -92,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onGlobalStateChanged(Core lc, GlobalState gstate, String message) {
             super.onGlobalStateChanged(lc, gstate, message);
-            Log.d("linphone_初始化状态=", gstate.name() + "===" + message+Thread.currentThread().getName());
+            Log.d("linphone_初始化状态=", gstate.name() + "===" + message);
+            binding.setInitState("初始化状态"+message);
             /**
              * 初始化成功
              */
@@ -102,34 +104,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 SipUtils.getIns().registerSip(username,
                         password,
                         displayname,
-                        domain);
-                Log.d("linphone_登录时间=", System.currentTimeMillis() - time1 + "");
-                try {
-                    LinphoneManager.getInstance(MainActivity.this).initLiblinphone(lc);
-                } catch (CoreException e) {
-                    e.printStackTrace();
-                }
+                        domain,new WeakReference<Context>(MainActivity.this));
+
             }
         }
 
         @Override
         public void onCallStateChanged(Core lc, Call call, Call.State cstate, String message) {
             super.onCallStateChanged(lc, call, cstate, message);
-            Log.d("linphone_通话状态=", cstate.name() + "===" + message+Thread.currentThread().getName());
-            /**
-             * 通话状态
-             */
+            Log.d("linphone_通话状态=", cstate.name() + "===" + message);
+            //通话状态
+            binding.setCallstate("通话状态"+message);
 
         }
 
         @Override
         public void onRegistrationStateChanged(Core lc, ProxyConfig cfg, RegistrationState cstate, String message) {
             super.onRegistrationStateChanged(lc, cfg, cstate, message);
-            Log.d("linphone_注册状态=", cstate.toString() + "===" + message+Thread.currentThread().getName());
-            /**
-             * 注册成功
-             */
+            Log.d("linphone_注册状态=", cstate.toString() + "===" + message);
+            //注册成功
             SipUtils.getIns().setRegister(cstate == RegistrationState.Ok);
+            binding.setRegisterState("注册状态"+message);
         }
     };
 }

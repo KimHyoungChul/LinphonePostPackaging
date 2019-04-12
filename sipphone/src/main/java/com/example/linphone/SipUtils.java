@@ -143,9 +143,9 @@ public class SipUtils {
      * SipUtils.registerSip(sipinfo.getUsername(), "", sipinfo.getPassword(), sipinfo.getDisplaynumber(), null,null, sipinfo.getSipurl(), TransportType.Udp);
      */
     public void registerSip(String username,
-                               String password,
-                               String displayname,
-                               String domain) {
+                            String password,
+                            String displayname,
+                            String domain, WeakReference<Context> reference) {
         TransportType transport = TransportType.Udp;
 
         username = getDisplayableUsernameFromAddress(mCore, username);
@@ -163,6 +163,11 @@ public class SipUtils {
 
         try {
             builder.saveNewAccount();
+        } catch (CoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            LinphoneManager.getInstance(reference.get()).initLiblinphone(mCore);
         } catch (CoreException e) {
             e.printStackTrace();
         }
@@ -319,7 +324,6 @@ public class SipUtils {
 
     public void signOut() {
         if (instance == null || mCore == null) return;
-        LinphoneManager.getInstance().deleteAccount(0);
         ProxyConfig[] prxCfgs = mCore.getProxyConfigList();
         if (prxCfgs != null) for (ProxyConfig prxCfg : prxCfgs) {
             if (prxCfg != null) {

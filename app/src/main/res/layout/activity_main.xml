@@ -7,6 +7,15 @@
         <variable
             name="click"
             type="android.view.View.OnClickListener" />
+        <variable
+            name="initState"
+            type="String" />
+        <variable
+            name="registerState"
+            type="String" />
+        <variable
+            name="callstate"
+            type="String" />
     </data>
 
     <LinearLayout
@@ -14,7 +23,30 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".MainActivity">
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:textSize="16sp"
+            android:text="@{initState}"
+            android:hint="初始化状态"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:textSize="16sp"
+            android:text="@{registerState}"
+            android:hint="注册状态"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:textSize="16sp"
+            android:text="@{callstate}"
+            android:hint="通话状态"
+            />
         <TextView
             android:id="@+id/linphone_tv1"
             android:layout_width="match_parent"

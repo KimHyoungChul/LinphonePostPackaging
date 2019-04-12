@@ -2,3 +2,4 @@
 .idea
 build
 LinphonePostPackaging.iml
+sipphone/maven
