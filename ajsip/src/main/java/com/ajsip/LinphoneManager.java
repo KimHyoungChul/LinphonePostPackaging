@@ -1,4 +1,4 @@
-package com.example.linphone;
+package com.ajsip;
 
 /*
 LinphoneManager.java
@@ -31,6 +31,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
@@ -39,8 +41,12 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
+
+import com.ajsip.call.CallManager;
 
 import org.linphone.core.AccountCreator;
 import org.linphone.core.AccountCreatorListener;
@@ -50,6 +56,7 @@ import org.linphone.core.AuthMethod;
 import org.linphone.core.Call;
 import org.linphone.core.Call.State;
 import org.linphone.core.CallLog;
+import org.linphone.core.CallParams;
 import org.linphone.core.CallStats;
 import org.linphone.core.ChatMessage;
 import org.linphone.core.ChatRoom;
@@ -90,6 +97,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import static android.media.AudioManager.MODE_RINGTONE;
 import static android.media.AudioManager.STREAM_RING;
@@ -135,9 +143,9 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
         mLinphoneFactoryConfigFile = basePath + "/linphonerc";
         mConfigFile = basePath + "/.linphonerc";
         mDynamicConfigFile = basePath + "/assistant_create.rc";
-        mChatDatabaseFile = basePath + "/linphone-history.db";
-        mCallLogDatabaseFile = basePath + "/linphone-log-history.db";
-        mFriendsDatabaseFile = basePath + "/linphone-friends.db";
+        mChatDatabaseFile = basePath + "/ajsip-history.db";
+        mCallLogDatabaseFile = basePath + "/ajsip-log-history.db";
+        mFriendsDatabaseFile = basePath + "/ajsip-friends.db";
         mRingSoundFile = basePath + "/ringtone.mkv";
         mUserCertsPath = basePath + "/user-certs";
 
@@ -154,7 +162,6 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
                        Log.e(mUserCertsPath+" can't be created.");
             }
         }
-        mLc=SipUtils.getIns().getmCore();
         mMediaScanner = new LinphoneMediaScanner(c);
     }
 
@@ -232,11 +239,6 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
         mLc = lc;
 
         mLc.setZrtpSecretsFile(basePath + "/zrtp_secrets");
-        try {
-            mLc.setUserAgent(SipUtils.getIns().getUserAgentName(), SipUtils.getIns().getUserAgentversion());
-        } catch (Exception e) {
-            Log.e(e, "cannot get version name");
-        }
 
         mLc.setChatDatabasePath(mChatDatabaseFile);
         mLc.setCallLogsDatabasePath(mCallLogDatabaseFile);
@@ -251,7 +253,7 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
 
         mLc.migrateLogsFromRcToDb();
 
-        // Migrate existing linphone accounts to have conference factory uri set
+        // Migrate existing ajsip accounts to have conference factory uri set
 
 
         initPushNotificationsService();
@@ -996,7 +998,7 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
             return false; // continue
         }
 
-        if (!SipUtils.getIns().isOnLine()) {
+        if (getLc()!=null) {
             Log.i("Couldn't change softvolume has service is not running");
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
@@ -1029,6 +1031,17 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
             displayName = address.asStringUriOnly();
         }
         return displayName;
+    }
+    public String getAddressDisplayName() {
+        Address address = getLc().getCurrentCallRemoteAddress();
+        if (address == null) return null;
+        return address.getDisplayName();
+    }
+
+    public String getasStringUriOnly() {
+        Address address = getLc().getCurrentCallRemoteAddress();
+        if (address == null) return null;
+        return address.asStringUriOnly();
     }
 
     public void resetDefaultProxyConfig() {
@@ -1135,6 +1148,225 @@ public class LinphoneManager implements  SensorEventListener, AccountCreatorList
                 }
             });
         }
+    }
+
+    /**
+     * 发送按键值
+     *
+     * @param c
+     */
+    public void sendDtmf(char c) {
+        if (getLc() != null && getLc().getCurrentCall() != null) {
+            getLc().getCurrentCall().sendDtmf(c);
+        }
+    }
+    /**
+     * 关闭按键声音
+     */
+    public void stopDtmf() {
+        if (getLc() != null) {
+            getLc().stopDtmf();
+        }
+    }
+    /**
+     * 通话是否静音
+     *
+     * @param isMicMuted
+     */
+    public void switchingMute(boolean isMicMuted) {
+        if (getLc() != null) {
+            getLc().enableMic(isMicMuted);
+        } else {
+            throw new NullPointerException("核心类core为空");
+        }
+    }
+    /**
+     * 挂断电话
+     */
+    public void hangUp() {
+        if (getLc() != null) {
+            if (getLc().isInConference()) {
+                getLc().terminateConference();
+            } else {
+                getLc().terminateAllCalls();
+            }
+        } else {
+            throw new NullPointerException("核心类core为空");
+        }
+    }
+
+
+    /**
+     * 接听电话
+     *
+     * @return
+     */
+    public boolean answer(Context context) {
+        CallParams params = getLc().createCallParams(getLc().getCurrentCall());
+
+        boolean isLowBandwidthConnection = !isHighBandwidthConnection(context);
+
+        if (params != null) {
+            params.enableLowBandwidth(isLowBandwidthConnection);
+        } else {
+            Log.e("Could not create call params for call");
+        }
+
+        if (params == null || !acceptCallWithParams(getLc().getCurrentCall(), params)) {
+            // the above method takes care of Samsung Galaxy S
+            Toast.makeText(context, "接受呼叫时出错", Toast.LENGTH_SHORT).show();
+        } else {
+            LinphoneManager.getInstance().routeAudioToReceiver();
+
+        }
+        return true;
+    }
+
+    public boolean acceptCallWithParams(Call call, CallParams params) {
+        getLc().acceptCallWithParams(call, params);
+        return true;
+    }
+    public static boolean isHighBandwidthConnection(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return (info != null && info.isConnected() && isConnectionFast(info.getType(), info.getSubtype()));
+    }
+
+    /**
+     * 拨打电话
+     *
+     * @param context
+     * @param number
+     */
+    public void call(String number,String displayName, Map<String,String> headMap,Context context) {
+        try {
+            if (!acceptCallIfIncomingPending(getLc())) {
+
+                newOutgoingCall(getLc(), number, "",headMap, context);
+            }
+        } catch (CoreException e) {
+            getLc().terminateCall(getLc().getCurrentCall());
+        }
+
+    }
+
+    public static void newOutgoingCall(Core mLc, String to, String displayName, Map<String,String> headMap, Context context) {
+//		if (mLc.inCall()) {
+//			listenerDispatcher.tryingNewOutgoingCallButAlreadyInCall();
+//			return;
+//		}
+        if (to == null) return;
+
+        // If to is only a username, try to find the contact to get an alias if existing
+
+        Address lAddress;
+        lAddress = mLc.interpretUrl(to); // InterpretUrl does normalizePhoneNumber
+        if (lAddress == null) {
+            Log.e("Couldn't convert to String to Address : " + to);
+            return;
+        }
+
+        ProxyConfig lpc = mLc.getDefaultProxyConfig();
+        if (false && lpc != null && lAddress.asStringUriOnly().equals(lpc.getIdentityAddress())) {
+            return;
+        }
+        lAddress.setDisplayName(displayName);
+
+        boolean isLowBandwidthConnection = !isHighBandwidthConnection(context);
+
+        if (mLc.isNetworkReachable()) {
+            try {
+                CallManager.getInstance().inviteAddress(mLc,headMap, lAddress, false, isLowBandwidthConnection);
+
+
+            } catch (CoreException e) {
+                Exception exception = e;
+                return;
+            }
+        } else {
+            Log.d("ajsip ", "Network is unreachable");
+        }
+    }
+
+
+
+    public static boolean acceptCallIfIncomingPending(Core mLc) throws CoreException {
+        if (mLc.isIncomingInvitePending()) {
+            mLc.acceptCall(mLc.getCurrentCall());
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isConnectionFast(int type, int subType) {
+        if (type == ConnectivityManager.TYPE_MOBILE) {
+            switch (subType) {
+                case TelephonyManager.NETWORK_TYPE_EDGE:
+                case TelephonyManager.NETWORK_TYPE_GPRS:
+                case TelephonyManager.NETWORK_TYPE_IDEN:
+                    return false;
+            }
+        }
+        //in doubt, assume connection is good.
+        return true;
+    }
+
+    public void signOut() {
+        if (instance == null || getLc() == null) return;
+        ProxyConfig[] prxCfgs = getLc().getProxyConfigList();
+        if (prxCfgs != null) for (ProxyConfig prxCfg : prxCfgs) {
+            if (prxCfg != null) {
+                getLc().removeProxyConfig(prxCfg);
+                Address addr = prxCfg.getIdentityAddress();
+                if (addr != null) {
+                    AuthInfo authInfo = getLc().findAuthInfo(null, addr.getUsername(), addr.getDomain());
+                    if (authInfo != null) {
+                        getLc().removeAuthInfo(authInfo);
+                    }
+                }
+            }
+        }
+        getLc().setDefaultProxyConfig(null);
+        getLc().clearAllAuthInfo();
+        getLc().clearProxyConfig();
+
+        getLc().refreshRegisters();
+
+        LinphoneManager.destroy();
+
+    }
+
+    public int getCurrentDirection() {
+        int time = 0;
+        if (getLc()!=null&&getLc().getCurrentCall()!=null){
+            time=getLc().getCurrentCall().getDuration();
+        }
+        return time;
+
+    }
+    public String getUserAgent() {
+        if (getLc()==null||getLc().getUserAgent()==null) return null;
+        return getLc().getUserAgent();
+    }
+    public String getDomain(String name) {
+        if (getLc()==null||getLc().getAuthInfoList()==null) return null;
+        String tempDomain="";
+        for (AuthInfo authInfo : getLc().getAuthInfoList()) {
+            if (TextUtils.equals(authInfo.getUsername(),name)){
+                tempDomain=authInfo.getDomain();
+                break;
+            }
+        }
+        return tempDomain;
+    }
+    public String getCallDomain() {
+        if (getLc()==null||getLc().getCurrentCallRemoteAddress()==null) return null;
+        return getLc().getCurrentCallRemoteAddress().getDomain();
+    }
+    public String getCallUserName() {
+        Address address = getLc().getCurrentCallRemoteAddress();
+        if (address == null) return null;
+        return address.getUsername();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.linphone.call;
+package com.ajsip.call;
 
 /*
 CallManager.java
@@ -26,6 +26,8 @@ import org.linphone.core.Core;
 import org.linphone.core.CoreException;
 import org.linphone.mediastream.Log;
 
+import java.util.Map;
+
 /**
  * Handle call updating, reinvites.
  */
@@ -45,9 +47,12 @@ public class CallManager {
     }
 
 
-    public void inviteAddress(Core lc, Address lAddress, boolean videoEnabled, boolean lowBandwidth) throws CoreException {
+    public void inviteAddress(Core lc, Map<String,String> headMap, Address lAddress, boolean videoEnabled, boolean lowBandwidth) throws CoreException {
 
         CallParams params = lc.createCallParams(null);
+        if (headMap!=null) for (String s : headMap.keySet()) {
+            params.addCustomHeader(s,headMap.get(s));
+        }
         updateWithProfileSettings(lc, params);
 
         if (videoEnabled && params.videoEnabled()) {
@@ -96,7 +101,7 @@ public class CallManager {
     }
 
     /**
-     * Change the preferred video size used by linphone core. (impact landscape/portrait buffer).
+     * Change the preferred video size used by ajsip core. (impact landscape/portrait buffer).
      * Update current call, without reinvite.
      * The camera will be restarted when mediastreamer chain is recreated and setParameters is called.
      */

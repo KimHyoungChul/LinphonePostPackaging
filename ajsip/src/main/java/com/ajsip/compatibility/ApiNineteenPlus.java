@@ -1,11 +1,10 @@
-package com.example.linphone.compatibility;
+package com.ajsip.compatibility;
 
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 
-/*
-ApiElevenPlus.java
+/*ApiNineteenPlus.java
 Copyright (C) 2017  Belledonne Communications, Grenoble, France
 
 This program is free software; you can redistribute it and/or
@@ -23,9 +22,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-@TargetApi(11)
-public class ApiElevenPlus {
+@TargetApi(19)
+public class ApiNineteenPlus {
     public static void scheduleAlarm(AlarmManager alarmManager, int type, long triggerAtMillis, PendingIntent operation) {
-        alarmManager.set(type, triggerAtMillis, operation);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(type, triggerAtMillis, operation);
+        } else {
+            alarmManager.set(type, triggerAtMillis, operation);
+        }
     }
 }

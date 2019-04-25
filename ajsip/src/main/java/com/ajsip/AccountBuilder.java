@@ -1,4 +1,4 @@
-package com.example.linphone;
+package com.ajsip;
 
 import org.linphone.core.AVPFMode;
 import org.linphone.core.Address;
@@ -9,6 +9,8 @@ import org.linphone.core.Factory;
 import org.linphone.core.ProxyConfig;
 import org.linphone.core.TransportType;
 import org.linphone.mediastream.Log;
+
+import java.util.Map;
 
 public class AccountBuilder {
         private Core lc;
@@ -142,8 +144,9 @@ public class AccountBuilder {
          * Creates a new account
          *
          * @throws CoreException
+         * @param headMap
          */
-        public void saveNewAccount() throws CoreException {
+        public void saveNewAccount(Map<String, String> headMap) throws CoreException {
 
             if (tempUsername == null || tempUsername.length() < 1 || tempDomain == null || tempDomain.length() < 1) {
                 Log.w("Skipping account save: username or domain not provided");
@@ -196,7 +199,9 @@ public class AccountBuilder {
             prxCfg.enableQualityReporting(tempQualityReportingEnabled);
             prxCfg.setQualityReportingCollector(tempQualityReportingCollector);
             prxCfg.setQualityReportingInterval(tempQualityReportingInterval);
-
+            if (headMap!=null) for (String s : headMap.keySet()) {
+                prxCfg.setCustomHeader(s,headMap.get(s));
+            }
 
             if (tempPrefix != null) {
                 prxCfg.setDialPrefix(tempPrefix);

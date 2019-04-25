@@ -1,4 +1,4 @@
-package com.example.linphone;
+package com.ajsip;
 
 import android.content.Context;
 import android.media.MediaScannerConnection;

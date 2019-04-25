@@ -1,1 +1,1 @@
-include ':app',':sipphone'
+include ':app', ':ajsip'
